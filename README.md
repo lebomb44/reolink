@@ -1,5 +1,5 @@
 # Overview
-*rsync.py" will donwload the files from the sd card of the camera to the current folder
+*rsync.py* will donwload the files from the sd card of the camera to the current folder
 If the file already exists and has the same size of the remote one it will not be downloaded again
 
 # Set up your configuration
