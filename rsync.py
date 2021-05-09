@@ -14,10 +14,26 @@ import datetime
 
 import myconfig
 
+
 ip=myconfig.ip
 port=myconfig.port
 user=myconfig.user
 password=myconfig.password
+output=myconfig.output
+
+print("### Remove old local files ###")
+rm_date = datetime.datetime.now() - datetime.timedelta(32)
+for (lspath, lsdirs, lsfiles) in os.walk(output):
+    for lsfile in lsfiles:
+        try:
+            eltfile = list(lsfile.split("_"))
+            lsfile_date = datetime.datetime.strptime(eltfile[1], "%Y%m%d")
+            if lsfile_date < rm_date:
+                os.remove(lspath + "/" + lsfile)
+                print("Removed: " + lspath + "/" + lsfile)
+        except:
+            os.remove(lspath + "/" + lsfile)
+            print("Removed: " + lspath + "/" + lsfile)
 
 headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
 
@@ -32,7 +48,7 @@ def buildSearch_query(last_days):
 def buildDl_url(ip, port, user, password, name):
     return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&rs=abcde&source="+name+"&output="+name+"&user="+user+"&password="+password
 
-# Request the list of available files
+print("### Request the list of available files ###")
 resp = requests.post(buildSearch_url(ip, port, user, password), headers=headers, data=buildSearch_query(31), timeout=10.0)
 if resp.status_code != 200:
     sys.exit("Search request invalid on "+ip+":"+port)
@@ -51,7 +67,7 @@ if "File" not in jr[0]["value"]["SearchResult"]:
     print(jr[0]["value"]["SearchResult"])
     sys.exit("'File' key not found in answer to search query")
 
-# Download the files
+print("### Download the files ###")
 for file in jr[0]["value"]["SearchResult"]["File"]:
     if "name" not in file:
         print("'name' key not found")
@@ -69,6 +85,6 @@ for file in jr[0]["value"]["SearchResult"]["File"]:
             raise OSError
     except OSError:
         print("Downloading " + name + " (" + str(size) + " bytes)")
-        wget.download(buildDl_url(ip, port, user, password, name))
+        wget.download(buildDl_url(ip, port, user, password, name), output + "/" + name)
         print("\r")
 
