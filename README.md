@@ -6,10 +6,40 @@ If the file already exists and has the same size of the remote one it will not b
 Create a file named "myconfig.py" with the following variables
 
 ```python
-ip="xxx.xxx.xxx.xxx"
-port="80"
-user="myusername"
-password="mypassword"
+#! /usr/bin/env python3
+# coding: utf-8
+
+
+""" Reolink COnfiguration file """
+
+class config:
+    ip = ""
+    port = ""
+    user = ""
+    password = ""
+    output = ""
+
+fr_allee = config()
+fr_allee.ip="x.x.x.x"
+fr_allee.port="x"
+fr_allee.user="x"
+fr_allee.password="x"
+fr_allee.output="/path/to/allee"
+
+fr_veranda = config()
+fr_veranda.ip="x.x.x.x"
+fr_veranda.port="x"
+fr_veranda.user="x"
+fr_veranda.password="x"
+fr_veranda.output="/path/to/veranda"
+
+bt_panoramix = config()
+bt_panoramix.ip="x.x.x."
+bt_panoramix.port="x"
+bt_panoramix.user="x"
+bt_panoramix.password="x"
+bt_panoramix.output="/path/to/panoramix"
+
 ```
 
 # Run the script
