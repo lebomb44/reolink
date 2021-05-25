@@ -34,7 +34,7 @@ fr_veranda.password="x"
 fr_veranda.output="/path/to/veranda"
 
 bt_panoramix = config()
-bt_panoramix.ip="x.x.x."
+bt_panoramix.ip="x.x.x.x"
 bt_panoramix.port="x"
 bt_panoramix.user="x"
 bt_panoramix.password="x"
