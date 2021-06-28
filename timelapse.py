@@ -7,9 +7,10 @@ import myconfig
 
 
 def build_timelapse(config):
-    output=config.output
-    print("### Building timelapses at " + output)
-    for (lspath, lsdirs, lsfiles) in os.walk(output):
+    records = config.storage + "/records"
+    output = config.storage + "/timelapses"
+    print("### Building timelapses from " + records)
+    for (lspath, lsdirs, lsfiles) in os.walk(records):
         workdays = []
         lsfiles.sort()
         for lsfile in lsfiles:
@@ -53,7 +54,7 @@ def build_timelapse(config):
                     print(str(frames_nb_tl) + " frames added over " + str(frames_nb_ori) + " with speed " + str(speed))
                 writer.release()
             else:
-                print("    " + tl_filename + " already exists")
+                print("    "  + output + "/" + tl_filename + " already exists")
 
 build_timelapse(myconfig.fr_allee)
 build_timelapse(myconfig.fr_veranda)
