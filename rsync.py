@@ -6,9 +6,10 @@
 
 
 import requests
+import shutil
 import json
 #import wget
-import urllib
+#import urllib
 import sys
 import signal
 import os
@@ -53,7 +54,7 @@ def download_files(name, ip, port, user, password, age, output):
     headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
     for i in range(0, 10):
         try:
-            resp = requests.post(buildSearch_url(ip, port, user, password), headers=headers, data=buildSearch_query(age), timeout=10.0)
+            resp = requests.post(buildSearch_url(ip, port, user, password), headers=headers, data=buildSearch_query(age), verify=False, timeout=10.0)
             if resp.status_code == 200:
                 break
         except:
@@ -96,7 +97,12 @@ def download_files(name, ip, port, user, password, age, output):
                 try:
                     print("Downloading " + fname + " (" + str(size) + " bytes) from " + name + "...", end="", flush=True)
                     #wget.download(buildDl_url(ip, port, user, password, fname), output + "/" + fname)
-                    urllib.request.urlretrieve(buildDl_url(ip, port, user, password, fname), output + "/" + fname)
+                    #urllib.request.urlretrieve(buildDl_url(ip, port, user, password, fname), output + "/" + fname)
+                    url_to_dl = buildDl_url(ip, port, user, password, fname)
+                    dl_file_full_path = output + "/" + fname
+                    with requests.get(url_to_dl, stream=True, verify=False, timeout=10.0) as r:
+                        with open(dl_file_full_path, 'wb') as f:
+                            shutil.copyfileobj(r.raw, f)
                     print("OK")
                     break
                 except KeyboardInterrupt:
