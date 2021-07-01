@@ -52,13 +52,19 @@ def buildDl_url(ip, port, user, password, name):
 def download_files(name, ip, port, user, password, age, output):
     print("### Request the list of available files from " + name + " ###")
     headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
+    resp = None
+    search_request_is_ok = False
     for i in range(0, 10):
         try:
             resp = requests.post(buildSearch_url(ip, port, user, password), headers=headers, data=buildSearch_query(age), verify=False, timeout=10.0)
             if resp.status_code == 200:
+                search_request_is_ok = True
                 break
-        except:
-            return
+        except Exception as ex:
+            print("ERROR : " + name + " : " + str(ex))
+    if search_request_is_ok is False:
+        print("ERROR : " + name + " : Too many attempts for search request")
+        return
     # Convert the answer to JSON format
     jr=resp.json()
     # Check the answer
