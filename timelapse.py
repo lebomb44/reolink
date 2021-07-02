@@ -1,15 +1,37 @@
+#! /usr/bin/env python3
+# coding: utf-8
+
+
+""" Reolink Timelapse from Records """
+ 
 # Copy from https://evigio.com/post/creating-a-time-lapse-video-editing-with-python
 # Other: https://github.com/dannyvai/pylapse/blob/master/pylapse.py
 
 import os
+import datetime
 import cv2
 import myconfig
 
 
-def build_timelapse(config):
-    records = config.storage + "/records"
-    output = config.storage + "/timelapses"
-    print("### Building timelapses from " + records)
+def remove_old_files(name, output, age):
+    print("### Remove old local files from " + name + " ###")
+    rm_date = datetime.datetime.now() - datetime.timedelta(days=age)
+    rm_date = rm_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    print("### Older than " + str(rm_date) + " ###")
+    for (lspath, lsdirs, lsfiles) in os.walk(output):
+        for lsfile in lsfiles:
+            try:
+                eltfile = list(lsfile.split("_"))
+                lsfile_date = datetime.datetime.strptime(eltfile[0], "%Y%m%d")
+                if lsfile_date < rm_date:
+                    os.remove(lspath + "/" + lsfile)
+                    print("Removed: " + lspath + "/" + lsfile)
+            except:
+                os.remove(lspath + "/" + lsfile)
+                print("Removed: " + lspath + "/" + lsfile)
+
+def build_timelapse(name, records, output):
+    print("### Building timelapses from " + records + " to " + output + " for " + name)
     for (lspath, lsdirs, lsfiles) in os.walk(records):
         workdays = []
         lsfiles.sort()
@@ -18,11 +40,11 @@ def build_timelapse(config):
                 workday = list(lsfile.split("_"))[1]
                 if workday not in workdays:
                     workdays.append(workday)
-                    print("New timelapse to do: " + workday)
+                    print("New timelapse to do for " + name + ": " + workday)
         for workday in workdays:
             tl_filename = workday + "_timelapse.mp4"
             if tl_filename not in lsfiles:
-                print("Building: " + output + "/" + tl_filename)
+                print("Building for " + name + ": " + output + "/" + tl_filename)
                 lsfiles_wd = []
                 for lsfile in lsfiles:
                     if lsfile.startswith("Rec_") == True:
@@ -35,7 +57,7 @@ def build_timelapse(config):
                 writer = None
                 for lsfile in lsfiles_wd:
                     print("    adding: " + lsfile + "...", end="", flush=True)
-                    vid = cv2.VideoCapture(lsfile)
+                    vid = cv2.VideoCapture(records + "/" + lsfile)
                     if writer == None:
                         w = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
                         h = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
@@ -54,9 +76,13 @@ def build_timelapse(config):
                     print(str(frames_nb_tl) + " frames added over " + str(frames_nb_ori) + " with speed " + str(speed))
                 writer.release()
             else:
-                print("    "  + output + "/" + tl_filename + " already exists")
+                print("    "  + output + "/" + tl_filename + " already exists for " + name)
 
-build_timelapse(myconfig.fr_allee)
-build_timelapse(myconfig.fr_veranda)
-build_timelapse(myconfig.bt_panoramix)
+def do_timelapses(config):
+    remove_old_files(config.name, config.storage + "/timelapses", config.tl_age+1)
+    build_timelapse(config.name, config.storage + "/records", config.storage + "/timelapses")
+
+do_timelapses(myconfig.fr_allee)
+do_timelapses(myconfig.fr_veranda)
+do_timelapses(myconfig.bt_panoramix)
 

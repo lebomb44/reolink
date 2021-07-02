@@ -2,7 +2,7 @@
 # coding: utf-8
 
 
-""" Reolink RSYNC """
+""" Reolink RSYNC for Records """
 
 
 import requests
