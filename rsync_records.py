@@ -37,17 +37,19 @@ def remove_old_files(name, output, age):
 
 
 def buildSearch_url(ip, port, user, password):
-    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Search&rs=abcde&user="+user+"&password="+password
+    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Search&user="+user+"&password="+password+"&token=1234"
 
 def buildSearch_query(last_days):
-    end_date = datetime.datetime.now()
-    start_date = end_date - datetime.timedelta(days=last_days)
+    start_date = datetime.datetime.now() - datetime.timedelta(days=last_days)
     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = start_date.replace(hour=23, minute=59, second=59, microsecond=999999)
     print("### Search from " + str(start_date) + " to " + str(end_date) + " ###")
-    return '[{"cmd":"Search","action":0,"param":{"Search":{"channel":0,"onlyStatus":0,"streamType":"main","StartTime":{"year":'+str(start_date.year)+',"mon":'+str(start_date.month)+',"day":'+str(start_date.day)+',"hour":'+str(start_date.hour)+',"min":'+str(start_date.minute)+',"sec":'+str(start_date.second)+'},"EndTime":{"year":'+str(end_date.year)+',"mon":'+str(end_date.month)+',"day":'+str(end_date.day)+',"hour":'+str(end_date.hour)+',"min":'+str(end_date.minute)+',"sec":'+str(end_date.second)+'}}}}]'
+    return '[{"cmd":"Search","action":1,"param":{"Search":{"channel":0,"onlyStatus":0,"streamType":"main","StartTime":{"year":'+str(start_date.year)+',"mon":'+str(start_date.month)+',"day":'+str(start_date.day)+',"hour":'+str(start_date.hour)+',"min":'+str(start_date.minute)+',"sec":'+str(start_date.second)+'},"EndTime":{"year":'+str(end_date.year)+',"mon":'+str(end_date.month)+',"day":'+str(end_date.day)+',"hour":'+str(end_date.hour)+',"min":'+str(end_date.minute)+',"sec":'+str(end_date.second)+'}}}}]'
 
 def buildDl_url(ip, port, user, password, name):
-    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&rs=abcde&source="+name+"&output="+name+"&user="+user+"&password="+password
+    input_name = name
+    output_name = name.replace("/", "_")
+    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&source="+input_name+"&output="+output_name+"&user="+user+"&password="+password+"&token=1234"
 
 def download_files(name, ip, port, user, password, age, output):
     print("### Request the list of available files from " + name + " ###")
@@ -56,7 +58,11 @@ def download_files(name, ip, port, user, password, age, output):
     search_request_is_ok = False
     for i in range(0, 10):
         try:
-            resp = requests.post(buildSearch_url(ip, port, user, password), headers=headers, data=buildSearch_query(age), verify=False, timeout=10.0)
+            url_ = buildSearch_url(ip, port, user, password)
+            #print("SEARCH URL = " + url_)
+            data_ = buildSearch_query(age)
+            #print("SEARCH DATA = " + data_)
+            resp = requests.post(url_, headers=headers, data=data_, verify=False, timeout=10.0)
             if resp.status_code == 200:
                 search_request_is_ok = True
                 break
@@ -77,7 +83,8 @@ def download_files(name, ip, port, user, password, age, output):
         print(jr[0]["value"])
         sys.exit("'SearchResult' key not found in answer to search query")
     if "File" not in jr[0]["value"]["SearchResult"]:
-        print(jr[0]["value"]["SearchResult"])
+        print("    No file to download: " + str(jr[0]["value"]["SearchResult"]))
+        return
         sys.exit("'File' key not found in answer to search query")
 
     print("### Download the files from " + name + " ###")
@@ -85,27 +92,30 @@ def download_files(name, ip, port, user, password, age, output):
         if "name" not in file:
             print("'name' key not found")
             continue
-        fname=file['name']
+        remote_name = file['name']
+        local_name = remote_name.replace("/", "_")
+        dl_file_full_path = output + "/" + local_name
         if "size" not in file:
-            print("'size' key not found for file " + fname)
+            print("'size' key not found for file " + remote_name)
             continue
-        size=int(file["size"])
+        remote_size=int(file["size"])
         try:
-            if os.path.getsize(output + "/" + fname) == size:
-                print(fname + " already downloaded (" + str(size) + " bytes) from " + name)
+            if os.path.getsize(dl_file_full_path) == remote_size:
+                print(remote_name + " already downloaded (" + str(remote_size) + " bytes) from " + name)
                 continue
             else:
-                print("Remote size is " + str(size) + ", local size is " + str(os.path.getsize(fname)))
+                print("Remote size is " + str(remote_size) + ", local size is " + str(os.path.getsize(dl_file_full_path)))
                 raise OSError
         except OSError as err:
             #print(err)
             for i in range(0, 10):
                 try:
-                    print("Downloading " + fname + " (" + str(size) + " bytes) from " + name + "...", end="", flush=True)
-                    #wget.download(buildDl_url(ip, port, user, password, fname), output + "/" + fname)
-                    #urllib.request.urlretrieve(buildDl_url(ip, port, user, password, fname), output + "/" + fname)
-                    url_to_dl = buildDl_url(ip, port, user, password, fname)
-                    dl_file_full_path = output + "/" + fname
+                    print("Downloading " + remote_name + " (" + str(remote_size) + " bytes) from " + name + "...", end="", flush=True)
+                    #wget.download(buildDl_url(ip, port, user, password, remote_name), dl_file_full_path)
+                    #urllib.request.urlretrieve(buildDl_url(ip, port, user, password, remote_name), dl_file_full_path)
+                    url_to_dl = buildDl_url(ip, port, user, password, remote_name)
+                    print("DL URL = " + url_to_dl)
+                    print("DL DST = " + dl_file_full_path)
                     with requests.get(url_to_dl, stream=True, verify=False, timeout=10.0) as r:
                         with open(dl_file_full_path, 'wb') as f:
                             shutil.copyfileobj(r.raw, f)
@@ -118,8 +128,10 @@ def download_files(name, ip, port, user, password, age, output):
 
 def rsync_files(config):
     remove_old_files(config.name, config.storage + "/records", config.dl_age+1)
-    download_files(config.name, config.ip, config.port, config.user, config.password, config.dl_age, config.storage + "/records")
+    for age in range(config.dl_age, -1, -1):
+        download_files(config.name, config.ip, config.port, config.user, config.password, age, config.storage + "/records")
 
+rsync_files(myconfig.np_facade)
 rsync_files(myconfig.fr_allee)
 rsync_files(myconfig.fr_veranda)
 rsync_files(myconfig.bt_panoramix)
