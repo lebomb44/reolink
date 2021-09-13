@@ -57,13 +57,13 @@ def link_files(name, ip, port, user, password, age, output):
     headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
     resp = None
     search_request_is_ok = False
-    for i in range(0, 10):
+    for i in range(0, 3):
         try:
             url_ = buildSearch_url(ip, port, user, password)
             #log(name, "SEARCH URL = " + url_)
             data_ = buildSearch_query(name, age)
             #log(name, "SEARCH DATA = " + data_)
-            resp = requests.post(url_, headers=headers, data=data_, verify=False, timeout=10.0)
+            resp = requests.post(url_, headers=headers, data=data_, verify=False, timeout=3.0)
             if resp.status_code == 200:
                 search_request_is_ok = True
                 break
