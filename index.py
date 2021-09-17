@@ -11,6 +11,7 @@ import os
 import datetime
 import time
 import traceback
+import collections
 
 import myconfig
 
@@ -89,41 +90,32 @@ def link_files(name, ip, port, user, password, age, output):
         sys.exit("'File' key not found in answer to search query")
 
     log(name, "Create files links to " + name)
-    for file in jr[0]["value"]["SearchResult"]["File"]:
-        if "name" not in file:
+    remote_name_list = list()
+    unsorted_files = jr[0]["value"]["SearchResult"]["File"]
+    for file_key in unsorted_files:
+        if "name" not in file_key:
             log(name, "'name' key not found")
             continue
-        remote_name = file['name']
+        remote_name_list.append(file_key['name'])
+    sorted_remote_name_list = sorted(remote_name_list, reverse=True)
+    for remote_name in sorted_remote_name_list:
         local_name = remote_name.replace("/", "_")
-        dl_file_full_path = output + "/" + local_name
-        if "size" not in file:
-            log(name, "'size' key not found for file " + remote_name)
-            continue
-        remote_size=int(file["size"])
         url_to_dl = buildDl_url(ip, port, user, password, remote_name)
         print_link(local_name, url_to_dl)
 
 def rsync_files(config):
     global info_msg
     print("<h1>"+config.name+"</h1>")
-    for age in range(config.dl_age, -1, -1):
+    for age in range(0, config.dl_age):
         link_files(config.name, config.ip, config.port, config.user, config.password, age, config.storage + "/records")
     print("<h1>##### INFO #####</h1>")
     print("<p>"+info_msg+"</p>")
 
 print("<table><tbody>")
-print('<td style="vertical-align:top">')
-rsync_files(myconfig.bt_panoramix)
-print("</td>")
-print('<td style="vertical-align:top">')
-rsync_files(myconfig.np_facade)
-print("</td>")
-print('<td style="vertical-align:top">')
-rsync_files(myconfig.fr_allee)
-print("</td>")
-print('<td style="vertical-align:top">')
-rsync_files(myconfig.fr_veranda)
-print("</td>")
+for cam in myconfig.myconfig_list:
+    print('<td style="vertical-align:top">')
+    rsync_files(cam)
+    print("</td>")
 print("</tbody></table>")
 
 print("</body></html>")
