@@ -145,9 +145,7 @@ def rsync_files(config):
     for age in range(config.dl_age, -1, -1):
         download_files(config.name, config.ip, config.port, config.user, config.password, age, config.storage + "/records")
 
-rsync_files(myconfig.bt_panoramix)
-rsync_files(myconfig.np_facade)
-rsync_files(myconfig.fr_allee)
-rsync_files(myconfig.fr_veranda)
-
+for cam in myconfig.myconfig_list:
+    print("### " + cam.name + " ###")
+    rsync_files(cam)
 

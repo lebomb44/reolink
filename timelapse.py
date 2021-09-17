@@ -82,7 +82,7 @@ def do_timelapses(config):
     remove_old_files(config.name, config.storage + "/timelapses", config.tl_age+1)
     build_timelapse(config.name, config.storage + "/records", config.storage + "/timelapses")
 
-do_timelapses(myconfig.fr_allee)
-do_timelapses(myconfig.fr_veranda)
-do_timelapses(myconfig.bt_panoramix)
+for cam in myconfig.myconfig_list:
+    print("### " + cam.name + " ###")
+    #do_timelapses(cam)
 
