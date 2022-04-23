@@ -4,9 +4,15 @@
 
 """ Reolink Configuration file """
 
+user = "admin"
+password = "mypassword"
+ext_ip = "mycameras.mydomain.com"
+storage_root = "/home/osmc/HDD/cams"
+
 class config:
     name = ""
-    ip = ""
+    int_ip = ""
+    ext_ip = ""
     port = ""
     user = ""
     password = ""
@@ -14,37 +20,36 @@ class config:
     dl_age = 4
     tl_age = 3
 
-fr_allee = config()
-fr_allee.name="Frenes Allee"
-fr_allee.ip="x.x.x.x"
-fr_allee.port="82"
-fr_allee.user="admin"
-fr_allee.password="mypassword"
-fr_allee.storage="/home/lebomb/cams/Frenes/Allee"
-
-fr_veranda = config()
-fr_veranda.name="Frenes Veranda"
-fr_veranda.ip="x.x.x.x"
-fr_veranda.port="83"
-fr_veranda.user="admin"
-fr_veranda.password="mypassword"
-fr_veranda.storage="/home/lebomb/cams/Frenes/Veranda"
-
 bt_panoramix = config()
 bt_panoramix.name="Bourdilot Panoramix"
-bt_panoramix.ip="x.x.x.x"
-bt_panoramix.port="89"
-bt_panoramix.user="admin"
-bt_panoramix.password="mypassword"
-bt_panoramix.storage="/home/lebomb/cams/Bourdilot/Panoramix"
+bt_panoramix.int_ip="192.168.10.158"
+bt_panoramix.ext_ip=ext_ip
+bt_panoramix.int_port="80"
+bt_panoramix.ext_port="89"
+bt_panoramix.user=user
+bt_panoramix.password=password
+bt_panoramix.storage=storage_root+"/panoramix"
 
-np_facade = config()
-np_facade.name="Niepce Facade"
-np_facade.ip="x.x.x.x"
-np_facade.port="80"
-np_facade.user="admin"
-np_facade.password="mypassword"
-np_facade.storage="/home/lebomb/cams/Niepce/Facade"
+bt_entree = config()
+bt_entree.name="Bourdilot Entree"
+bt_entree.int_ip="192.168.10.159"
+bt_entree.ext_ip=ext_ip
+bt_entree.int_port="80"
+bt_entree.ext_port="90"
+bt_entree.user=user
+bt_entree.password=password
+bt_entree.storage=storage_root+"/entree"
 
-myconfig_list = { bt_panoramix, np_facade, fr_veranda, fr_allee }
+
+bt_facade = config()
+bt_facade.name="Bourdilot Facade"
+bt_facade.int_ip="192.168.10.155"
+bt_facade.ext_ip=ext_ip
+bt_facade.int_port="80"
+bt_facade.ext_port="85"
+bt_facade.user=user
+bt_facade.password=password
+bt_facade.storage=storage_root+"/facade"
+
+myconfig_list = { bt_panoramix, bt_entree, bt_facade }
 
