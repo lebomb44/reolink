@@ -12,6 +12,7 @@ import datetime
 import time
 import traceback
 import collections
+import cgi
 
 import myconfig
 
@@ -19,6 +20,11 @@ print('Content-Type: text/html')
 print('')
 print('<html><head><title>Cameras records ' + time.strftime('%Y/%m/%d %H:%M:%S') + '</title><meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"></head>')
 print("<body>")
+
+form = cgi.FieldStorage()
+access_from = "ext"
+if "access_from" in form:
+    access_from = form.getvalue('access_from')
 
 info_msg = ""
 error_msg = ""
@@ -53,7 +59,7 @@ def buildDl_url(ip, port, user, password, name):
 def print_link(name, url):
 	print('<a href="'+url+'">'+name+'</a><br>', flush=True)
 
-def link_files(name, ip, port, user, password, age, output):
+def link_files(name, ip, port, link_ip, link_port, user, password, age, output):
     log(name, "Request the list of available files from " + name)
     headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
     resp = None
@@ -100,14 +106,19 @@ def link_files(name, ip, port, user, password, age, output):
     sorted_remote_name_list = sorted(remote_name_list, reverse=True)
     for remote_name in sorted_remote_name_list:
         local_name = remote_name.replace("/", "_")
-        url_to_dl = buildDl_url(ip, port, user, password, remote_name)
+        url_to_dl = buildDl_url(link_ip, link_port, user, password, remote_name)
         print_link(local_name, url_to_dl)
 
 def rsync_files(config):
     global info_msg
     print("<h1>"+config.name+"</h1>")
     for age in range(0, config.dl_age):
-        link_files(config.name, config.ip, config.port, config.user, config.password, age, config.storage + "/records")
+        link_ip = config.ext_ip
+        link_port = config.ext_port
+        if access_from == "int":
+            link_ip = config.int_ip
+            link_port = config.int_port
+        link_files(config.name, config.int_ip, config.int_port, link_ip, link_port, config.user, config.password, age, config.storage + "/records")
     print("<h1>##### INFO #####</h1>")
     print("<p>"+info_msg+"</p>")
 
