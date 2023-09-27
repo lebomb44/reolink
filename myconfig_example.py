@@ -4,52 +4,52 @@
 
 """ Reolink Configuration file """
 
-user = "admin"
-password = "mypassword"
-ext_ip = "mycameras.mydomain.com"
-storage_root = "/home/osmc/HDD/cams"
-
 class config:
     name = ""
-    int_ip = ""
-    ext_ip = ""
-    port = ""
-    user = ""
-    password = ""
+    ip = ""
+    port = "80"
+    user = "user"
+    password = "password"
     storage = ""
     dl_age = 4
     tl_age = 3
 
-bt_panoramix = config()
-bt_panoramix.name="Bourdilot Panoramix"
-bt_panoramix.int_ip="192.168.10.158"
-bt_panoramix.ext_ip=ext_ip
-bt_panoramix.int_port="80"
-bt_panoramix.ext_port="89"
-bt_panoramix.user=user
-bt_panoramix.password=password
-bt_panoramix.storage=storage_root+"/panoramix"
+fr_allee = config()
+fr_allee.name="Frenes Allee"
+fr_allee.ip="192.168.1.152"
+fr_allee.storage="/home/osmc/cams/Frenes/Allee"
 
-bt_entree = config()
-bt_entree.name="Bourdilot Entree"
-bt_entree.int_ip="192.168.10.159"
-bt_entree.ext_ip=ext_ip
-bt_entree.int_port="80"
-bt_entree.ext_port="90"
-bt_entree.user=user
-bt_entree.password=password
-bt_entree.storage=storage_root+"/entree"
-
+fr_veranda = config()
+fr_veranda.name="Frenes Veranda"
+fr_veranda.ip="192.168.1.153"
+fr_veranda.storage="/home/osmc/cams/Frenes/Veranda"
 
 bt_facade = config()
 bt_facade.name="Bourdilot Facade"
-bt_facade.int_ip="192.168.10.155"
-bt_facade.ext_ip=ext_ip
-bt_facade.int_port="80"
-bt_facade.ext_port="85"
-bt_facade.user=user
-bt_facade.password=password
-bt_facade.storage=storage_root+"/facade"
+bt_facade.ip="192.168.10.155"
+bt_facade.storage="/home/osmc/cams/Bourdilot/Facade"
 
-myconfig_list = { bt_panoramix, bt_entree, bt_facade }
+bt_panoramix = config()
+bt_panoramix.name="Bourdilot Panoramix"
+bt_panoramix.ip="192.168.10.158"
+bt_panoramix.storage="/home/osmc/cams/Bourdilot/Panoramix"
+
+bt_entree = config()
+bt_entree.name="Bourdilot Entree"
+bt_entree.ip="192.168.10.159"
+bt_entree.storage="/home/osmc/cams/Bourdilot/Entree"
+
+np_facade = config()
+np_facade.name="Niepce Facade"
+np_facade.ip="192.168.10.152"
+np_facade.storage="/home/osmc/cams/Niepce/Facade"
+
+np_terrasse = config()
+np_terrasse.name="Niepce Terrasse"
+np_terrasse.ip="192.168.10.153"
+np_terrasse.storage="/home/osmc/cams/Niepce/Veranda"
+
+myconfig_list = { fr_allee, fr_veranda }
+myconfig_list = { bt_facade, bt_panoramix, bt_entree }
+myconfig_list = { np_facade, np_terrasse }
 
