@@ -29,6 +29,11 @@ bt_facade.name="Bourdilot Facade"
 bt_facade.ip="192.168.10.155"
 bt_facade.storage="/home/osmc/cams/Bourdilot/Facade"
 
+bt_galerie = config()
+bt_galerie.name="Bourdilot Galerie"
+bt_galerie.ip="192.168.10.157"
+bt_galerie.storage="/home/osmc/cams/Bourdilot/Galerie"
+
 bt_panoramix = config()
 bt_panoramix.name="Bourdilot Panoramix"
 bt_panoramix.ip="192.168.10.158"
@@ -39,17 +44,22 @@ bt_entree.name="Bourdilot Entree"
 bt_entree.ip="192.168.10.159"
 bt_entree.storage="/home/osmc/cams/Bourdilot/Entree"
 
+np_entree = config()
+np_entree.name="Niepce Entree"
+np_entree.ip="192.168.10.151"
+np_entree.storage="/media/HDD/cams/Niepce/Facade"
+
 np_facade = config()
 np_facade.name="Niepce Facade"
 np_facade.ip="192.168.10.152"
-np_facade.storage="/home/osmc/cams/Niepce/Facade"
+np_facade.storage="/media/HDD/cams/Niepce/Facade"
 
 np_terrasse = config()
 np_terrasse.name="Niepce Terrasse"
 np_terrasse.ip="192.168.10.153"
-np_terrasse.storage="/home/osmc/cams/Niepce/Veranda"
+np_terrasse.storage="/media/HDD/cams/Niepce/Veranda"
 
 myconfig_list = { fr_allee, fr_veranda }
-myconfig_list = { bt_facade, bt_panoramix, bt_entree }
-myconfig_list = { np_facade, np_terrasse }
+myconfig_list = { bt_facade, bt_galerie, bt_panoramix, bt_entree }
+myconfig_list = { np_entree, np_facade, np_terrasse }
 
