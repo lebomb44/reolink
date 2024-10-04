@@ -42,7 +42,7 @@ def log_exception(name, ex, msg="ERROR Exception", end="\n", flush=True):
 
 
 def buildSearch_url(ip, port, user, password):
-    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Search&user="+user+"&password="+password+"&token=1234"
+    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Search&user="+user+"&password="+password
 
 def buildSearch_query(name, last_days):
     start_date = datetime.datetime.now() - datetime.timedelta(days=last_days)
@@ -54,7 +54,7 @@ def buildSearch_query(name, last_days):
 def buildDl_url(ip, port, user, password, name):
     input_name = name
     output_name = name.replace("/", "_")
-    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&source="+input_name+"&output="+output_name+"&user="+user+"&password="+password+"&token=1234"
+    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&source="+input_name+"&output="+output_name+"&user="+user+"&password="+password
 
 def print_link(name, url):
 	print('<a href="'+url+'">'+name+'</a><br>', flush=True)
@@ -79,21 +79,27 @@ def link_files(name, ip, port, link_ip, link_port, user, password, age, output):
     if search_request_is_ok is False:
         log(name, "ERROR : " + name + " : Too many attempts for search request")
         return
-    # Convert the answer to JSON format
-    jr=resp.json()
+    try:
+        # Convert the answer to JSON format
+        jr=resp.json()
+    except Exception as ex:
+        log_exception(name, ex, "ERROR : " + name)
     # Check the answer
     if len(jr) != 1:
-        sys.exit("Answer to search query has bad length, "+ str(len(jr)) + " received, 1 expected")
+        log(name, "Answer to search query has bad length, "+ str(len(jr)) + " received, 1 expected")
+        return
     if "value" not in jr[0]:
-        log(name, jr[0])
-        sys.exit("'value' key not found in answer to search query")
+        #log(name, jr[0])
+        log(name, "'value' key not found in answer to search query: " + str(jr[0]))
+        return
     if "SearchResult" not in jr[0]["value"]:
-        log(name, jr[0]["value"])
-        sys.exit("'SearchResult' key not found in answer to search query")
+        #log(name, jr[0]["value"])
+        log("'SearchResult' key not found in answer to search query: " + str(jr[0]["value"]))
+        return
     if "File" not in jr[0]["value"]["SearchResult"]:
         log(name, "    No file to download: " + str(jr[0]["value"]["SearchResult"]))
         return
-        sys.exit("'File' key not found in answer to search query")
+        #sys.exit("'File' key not found in answer to search query")
 
     log(name, "Create files links to " + name)
     remote_name_list = list()
@@ -111,14 +117,15 @@ def link_files(name, ip, port, link_ip, link_port, user, password, age, output):
 
 def rsync_files(config):
     global info_msg
+    info_msg = ""
     print("<h1>"+config.name+"</h1>")
     for age in range(0, config.dl_age):
-        link_ip = config.ext_ip
-        link_port = config.ext_port
+        link_ip = config.ip
+        link_port = config.port
         if access_from == "int":
             link_ip = config.int_ip
             link_port = config.int_port
-        link_files(config.name, config.int_ip, config.int_port, link_ip, link_port, config.user, config.password, age, config.storage + "/records")
+        link_files(config.name, config.ip, config.port, link_ip, link_port, config.user, config.password, age, config.storage + "/records")
     print("<h1>##### INFO #####</h1>")
     print("<p>"+info_msg+"</p>")
 
