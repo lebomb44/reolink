@@ -13,6 +13,7 @@ import time
 import traceback
 import collections
 import cgi
+import os
 
 import myconfig
 
@@ -23,6 +24,8 @@ print("<body>")
 
 form = cgi.FieldStorage()
 access_from = "ext"
+if "192.168" in os.environ["REMOTE_ADDR"]:
+    access_from = "int"
 if "access_from" in form:
     access_from = form.getvalue('access_from')
 
@@ -51,15 +54,15 @@ def buildSearch_query(name, last_days):
     log(name, "Search from " + str(start_date) + " to " + str(end_date))
     return '[{"cmd":"Search","action":1,"param":{"Search":{"channel":0,"onlyStatus":0,"streamType":"main","StartTime":{"year":'+str(start_date.year)+',"mon":'+str(start_date.month)+',"day":'+str(start_date.day)+',"hour":'+str(start_date.hour)+',"min":'+str(start_date.minute)+',"sec":'+str(start_date.second)+'},"EndTime":{"year":'+str(end_date.year)+',"mon":'+str(end_date.month)+',"day":'+str(end_date.day)+',"hour":'+str(end_date.hour)+',"min":'+str(end_date.minute)+',"sec":'+str(end_date.second)+'}}}}]'
 
-def buildDl_url(ip, port, user, password, name):
+def buildDl_url(url, user, password, name):
     input_name = name
     output_name = name.replace("/", "_")
-    return "http://"+ip+":"+port+"/cgi-bin/api.cgi?cmd=Download&source="+input_name+"&output="+output_name+"&user="+user+"&password="+password
+    return url+"/cgi-bin/api.cgi?cmd=Download&source="+input_name+"&output="+output_name+"&user="+user+"&password="+password
 
 def print_link(name, url):
 	print('<a href="'+url+'">'+name+'</a><br>', flush=True)
 
-def link_files(name, ip, port, link_ip, link_port, user, password, age, output):
+def link_files(name, ip, port, link_url, user, password, age, output):
     log(name, "Request the list of available files from " + name)
     headers={"accept": "application/json", "content-type": "application/json", "accept-encoding": "gzip, deflate"}
     resp = None
@@ -112,7 +115,7 @@ def link_files(name, ip, port, link_ip, link_port, user, password, age, output):
     sorted_remote_name_list = sorted(remote_name_list, reverse=True)
     for remote_name in sorted_remote_name_list:
         local_name = remote_name.replace("/", "_")
-        url_to_dl = buildDl_url(link_ip, link_port, user, password, remote_name)
+        url_to_dl = buildDl_url(link_url, user, password, remote_name)
         print_link(local_name, url_to_dl)
 
 def rsync_files(config):
@@ -120,12 +123,10 @@ def rsync_files(config):
     info_msg = ""
     print("<h1>"+config.name+"</h1>")
     for age in range(0, config.dl_age):
-        link_ip = config.ip
-        link_port = config.port
-        if access_from == "int":
-            link_ip = config.int_ip
-            link_port = config.int_port
-        link_files(config.name, config.ip, config.port, link_ip, link_port, config.user, config.password, age, config.storage + "/records")
+        link_url = "http://" + config.ip + ":" + config.port
+        if access_from == "ext":
+            link_url = config.url_ext
+        link_files(config.name, config.ip, config.port, link_url, config.user, config.password, age, config.storage + "/records")
     print("<h1>##### INFO #####</h1>")
     print("<p>"+info_msg+"</p>")
 
